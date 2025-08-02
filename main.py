@@ -1,3 +1,5 @@
+import random as rand
+
 class AdvancedGate():
     def __init__(self, op):
         self.op = op
@@ -10,6 +12,15 @@ class AdvancedGate():
             mul = ElementaryGate("*")
             for i, w in zip(inputs, weights):
                 res = plus.compute([res, mul.compute([i,w])])
+        elif self.op == "random":
+            res = Value(0)
+            plus = ElementaryGate("+")
+            sub = ElementaryGate("-")
+            mul = ElementaryGate("*")
+            ops = [plus, sub, mul]
+            for _ in range(5):
+                choice = rand.choice(ops)
+                res += choice.compute(inputs)
         
         return res
 
@@ -106,6 +117,10 @@ class Value():
     def __rmul__(self, val):
         return val.__mul__(self.data)
 
+def print_grads(grads):
+    for g in grads:
+        print(f"{g} grad=", g.grad)
+
 def main():
     a = Value(10)
     b = Value(20)
@@ -114,19 +129,16 @@ def main():
     plus = ElementaryGate("+")
     mul = ElementaryGate("*")
     dot = AdvancedGate("dot")
-    y = plus.compute([a,b,69])
-    z = mul.compute([y, plus.compute([b,b,420])])
-    t = dot.compute([z,b], [w1, w2])
+    random = AdvancedGate("random")
+    y = plus.compute((a,b,69))
+    z = mul.compute((y, plus.compute((b,b,420))))
+    t = dot.compute((z,b), (w1, w2))
+    r = random.compute((t, a))
 
     # backprop
-    t.grad = 1
-    t.backward()
-    print("z grad=", z.grad)
-    print("y grad=", y.grad)
-    print("a grad=", a.grad)
-    print("b grad=", b.grad)
-    print("w1 grad=", w1.grad)
-    print("w2 grad=", w2.grad)
+    r.grad = 1
+    r.backward()
+    print_grads((a,b,y,z,w1,w2,t))
 
 if __name__ == "__main__":
     main()
