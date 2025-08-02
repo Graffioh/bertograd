@@ -1,4 +1,19 @@
-class Gate():
+class AdvancedGate():
+    def __init__(self, op):
+        self.op = op
+
+    def compute(self, inputs, weights = []):
+        res = Value(0)
+        if self.op == "dot":
+            res = Value(0)
+            plus = ElementaryGate("+")
+            mul = ElementaryGate("*")
+            for i, w in zip(inputs, weights):
+                res = plus.compute([res, mul.compute([i,w])])
+        
+        return res
+
+class ElementaryGate():
     def __init__(self, op):
         self.op = op
 
@@ -94,17 +109,24 @@ class Value():
 def main():
     a = Value(10)
     b = Value(20)
-    plus = Gate("+")
-    mul = Gate("*")
+    w1 = Value(15)
+    w2 = Value(5)
+    plus = ElementaryGate("+")
+    mul = ElementaryGate("*")
+    dot = AdvancedGate("dot")
     y = plus.compute([a,b,69])
     z = mul.compute([y, plus.compute([b,b,420])])
+    t = dot.compute([z,b], [w1, w2])
 
     # backprop
-    z.grad = 1
-    z.backward()
+    t.grad = 1
+    t.backward()
+    print("z grad=", z.grad)
     print("y grad=", y.grad)
     print("a grad=", a.grad)
     print("b grad=", b.grad)
+    print("w1 grad=", w1.grad)
+    print("w2 grad=", w2.grad)
 
 if __name__ == "__main__":
     main()
