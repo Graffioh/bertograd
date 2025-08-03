@@ -1,7 +1,7 @@
 import random as rand
 from value import Value
 
-# NOT USED, DID THIS JUST TO EXPERIMENT A BIT
+"""NOT USED, DID THIS JUST TO EXPERIMENT A BIT"""
 class AdvancedGate():
     def __init__(self, op):
         self.op = op
